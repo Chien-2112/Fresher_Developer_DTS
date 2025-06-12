@@ -25,4 +25,25 @@ app.use(express.urlencoded({ extended: true }));
 // INIT ROUTES.
 app.use("", indexRoute);
 
+// INIT DATABASE.
+import { connectDB } from "./config/connectDB.js";
+connectDB();
+
+// HANDLING ERROR.
+app.use((request, response, next) => {
+	const err = new Error("Not Found");
+	err.status = 404;
+	next(err);
+});
+
+app.use((err, request, response, next) => {
+	const statusCode = err.status || 500;
+	return response.status(statusCode).json({
+		status: "error",
+		code: statusCode,
+		stack: err.stack,
+		message: err.message || "Internal Server Error"
+	})
+})
+
 export default app;
