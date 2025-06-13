@@ -57,5 +57,6 @@ export {
 	ConflictRequestError,
 	BadRequestError,
 	UnauthorizedRequestError,
-	NotFoundError
+	NotFoundError,
+	ForBiddenError
 }

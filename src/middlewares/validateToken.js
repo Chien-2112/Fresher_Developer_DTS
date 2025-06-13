@@ -5,7 +5,8 @@ import { HEADER } from "../../constants.js";
 import {
 	BadRequestError,
 	NotFoundError,
-	UnauthorizedRequestError
+	UnauthorizedRequestError,
+	ForBiddenError
 } from "../core/error.response.js";
 import { KEYTOKEN } from "../models/keyToken.model.js";
 
@@ -60,4 +61,12 @@ const validateToken = async(request, response, next) => {
 	}
 }
 
-export { validateToken };
+const authorizedAdmin = async(request, response, next) => {
+	if(request.user.userId == request.params.id || request.user.role == "admin") {
+		next();
+	} else {
+		throw new ForBiddenError("You're not allowed to delete other");
+	}
+}
+
+export { validateToken, authorizedAdmin };

@@ -1,5 +1,5 @@
 "use strict";
-import { AuthService } from "../services/auth.service.js";
+import { AuthService } from "../services/access/auth.service.js";
 import { 
 	CREATED, 
 	OK 

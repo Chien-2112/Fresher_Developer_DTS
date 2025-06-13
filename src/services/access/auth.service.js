@@ -1,16 +1,17 @@
 "use strict";
-import { USER } from "../models/user.model.js";
+import { USER } from "../../models/user.model.js";
 import bcrypt from "bcrypt";
 import {
 	BadRequestError,
 	UnauthorizedRequestError
-} from "../core/error.response.js";
+} from "../../core/error.response.js";
 import { 
 	generateAccessToken, 
 	generateRefreshToken 
-} from "../auth/authUtils.js";
+} from "../../auth/authUtils.js";
 import { KeyTokenService } from "./keyToken.service.js";
 import crypto from "crypto";
+import { resolve } from "path";
 
 const SALT_ROUND = 10;
 
@@ -55,13 +56,13 @@ class AuthService {
 
 			const accessToken = generateAccessToken({
 				payload: {
-					user: { userId, email }
+					user: { userId, email, role },
 				},
 				privateKey
 			});
 			const refreshToken = generateRefreshToken({
 				payload: {
-					user: { userId, email }
+					user: { userId, email, role },
 				},
 				privateKey
 			});
@@ -100,8 +101,15 @@ class AuthService {
 		}
 
 		const { privateKey } = keyToken;
-		const newAccessToken = generateAccessToken({ payload: { user: { userId, email }}, privateKey });
-		const newRefreshToken = generateRefreshToken({ payload: { user: { userId, email }}, privateKey });
+		const newAccessToken = generateAccessToken({
+			payload: { 
+				user: { 
+					userId, email, role
+				}
+			}, 
+			privateKey 
+		});
+		const newRefreshToken = generateRefreshToken({ payload: { user: { userId, email, role }}, privateKey });
 		
 		await KeyTokenService.updateRefreshToken(userId, refreshToken, newRefreshToken);
 		return { newAccessToken, newRefreshToken };
