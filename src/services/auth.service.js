@@ -5,8 +5,12 @@ import {
 	BadRequestError,
 	UnauthorizedRequestError
 } from "../core/error.response.js";
-import { generateRefreshToken } from "../auth/authUtils.js";
+import { 
+	generateAccessToken, 
+	generateRefreshToken 
+} from "../auth/authUtils.js";
 import { KeyTokenService } from "./keyToken.service.js";
+import crypto from "crypto";
 
 const SALT_ROUND = 10;
 
@@ -35,10 +39,13 @@ class AuthService {
 	// SIGNIN SERVICE.
 	static signIn = async({ email, password, response }) => {
 		const foundUser = await USER.findOne({ email }).lean();
+		if(!foundUser) {
+			throw new BadRequestError("Email is not valid");
+		}
 		const validPassword = await bcrypt.compare(
 			password, foundUser.password
 		);
-		if(foundUser && validPassword) {
+		if(validPassword) {
 			const { _id: userId, email } = foundUser;
 			const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
 				modulusLength: 4096,
@@ -64,20 +71,40 @@ class AuthService {
 				userId, privateKey, publicKey, refreshToken
 			});
 
-			response.cookie("refreshToken", refreshToken, {
-				httpOnly: true,
-				maxAge: 72 * 60 * 60 * 1000,
-				secure: true,
-				path: "/",
-				sameSite: "strict"
-			});
-
-			return { accessToken };
+			return { accessToken, refreshToken };
 		} else {
 			throw new UnauthorizedRequestError(
-				"Email or Password not matched!"
+				"Password not matched!"
 			);
 		}
+	}
+
+	// LOGOUT SERVICE.
+	static logOut = async({ userId }) => {
+		console.log(userId);
+		const deleteKey = await KeyTokenService.removeKeyById(userId);
+		return deleteKey;
+	}
+
+	// REFRESH TOKEN SERVICE.
+	static handleRefreshToken = async({ keyToken, user, refreshToken }) => {
+		const { userId, email } = user;
+
+		if(keyToken.refreshTokenUsed.includes(refreshToken)) {
+			await KeyTokenService.deleteKeyById(userId); 
+			throw new BadRequestError("Something wrong happen!! Please relogin");
+		}
+
+		if(keyToken.refreshToken !== refreshToken) {
+			throw new UnauthorizedRequestError("User is not logged in");
+		}
+
+		const { privateKey } = keyToken;
+		const newAccessToken = generateAccessToken({ payload: { user: { userId, email }}, privateKey });
+		const newRefreshToken = generateRefreshToken({ payload: { user: { userId, email }}, privateKey });
+		
+		await KeyTokenService.updateRefreshToken(userId, refreshToken, newRefreshToken);
+		return { newAccessToken, newRefreshToken };
 	}
 }
 
