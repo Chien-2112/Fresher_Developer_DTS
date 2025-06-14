@@ -13,12 +13,12 @@ Developed the backend RESTful API, handling user management, authentication, aut
 
 ## Running the Application
 Supply the following keys in your .env variable:
-	PORT=5000
-	URL_MONGODB=mongodb://localhost:27017/DB_name
+- PORT=5000
+- URL_MONGODB=mongodb://localhost:27017/DB_name
 
 Follow these steps to run the application:
-	1. Install the package modules by running the command: npm install
-	2. Run the server: npm run start:dev
+- Install the package modules by running the command: npm install
+- Run the server: npm run start:dev
 
 ## 📚 Key Technologies
 - ⚙️ NodeJS: JavaScript runtime environment for building fast and scalable server-side applications.
