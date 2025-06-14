@@ -2,9 +2,10 @@
 import { USER } from "../../models/user.model.js";
 import {
 	BadRequestError,
+	ForBiddenError,
 	NotFoundError,
-	UnauthorizedRequestError
 } from "../../core/error.response.js";
+import { Types } from "mongoose";
 
 class UserService {
 	// GET ALL USERS.
@@ -17,20 +18,27 @@ class UserService {
 		}
 	}
 
-	// GET ONE USER BY ID.
+	// GET USER BY ID.
 	static getUser = async({ userId }) => {
 		if(!Types.ObjectId.isValid(userId)) {
 			throw new BadRequestError("Invalid user ID format");
 		}
-		const user = await USER.findById(userId).lean();
+		const user = await USER.findOne({ 
+			_id: userId, 
+			deleted: false 
+		}).lean();
+		
 		if(!user) throw new NotFoundError("User not found");
 		return user;
 	}
 
 	// UPDATE USER BY ID.
-	static updateUserById = async({ userId, updateData }) => {
+	static updateUserById = async({ userId, updateData, user }) => {
 		if(!Types.ObjectId.isValid(userId)) {
 			throw new BadRequestError("Invalid user ID format");
+		}
+		if(user.userId !== userId) {
+			throw new ForBiddenError("You don't have permission to update this user");
 		}
 		const updatedUser = await USER.findByIdAndUpdate(
 			{ _id: userId, deleted: false },

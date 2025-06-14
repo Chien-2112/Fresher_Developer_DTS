@@ -38,7 +38,7 @@ class AuthService {
 	}
 
 	// SIGNIN SERVICE.
-	static signIn = async({ email, password, response }) => {
+	static signIn = async({ email, password }) => {
 		const foundUser = await USER.findOne({ email }).lean();
 		if(!foundUser) {
 			throw new BadRequestError("Email is not valid");
@@ -47,7 +47,7 @@ class AuthService {
 			password, foundUser.password
 		);
 		if(validPassword) {
-			const { _id: userId, email } = foundUser;
+			const { _id: userId, email, role } = foundUser;
 			const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
 				modulusLength: 4096,
 				privateKeyEncoding: { type: "pkcs1", format: "pem" },

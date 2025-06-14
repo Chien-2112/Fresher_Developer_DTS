@@ -16,7 +16,7 @@ class UserController {
 		}).send(response);
 	}
 
-	// GET USER.
+	// GET USER BY ID.
 	getUser = async(request, response, next) => {
 		console.log(`[P]::Get User::`);
 		new OK({
@@ -28,11 +28,13 @@ class UserController {
 	// UPDATE USER BY ID.
 	updateUserById = async(request, response, next) => {
 		console.log(`[P]::Update User By Id::`);
+		
 		new OK({
 			message: "Update User success!",
 			metadata: await UserService.updateUserById({
 				userId: request.params.id,
-				updateData: request.body
+				updateData: request.body,
+				user: request.user
 			})
 		}).send(response);
 	}

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 const generateAccessToken = ({ payload, privateKey }) => {
 	return jwt.sign(payload, privateKey, {
 		algorithm: "RS256",
-		expiresIn: "30s"
+		expiresIn: "2 days"
 	});
 }
 

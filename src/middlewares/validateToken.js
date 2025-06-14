@@ -61,12 +61,22 @@ const validateToken = async(request, response, next) => {
 	}
 }
 
-const authorizedAdmin = async(request, response, next) => {
-	if(request.user.userId == request.params.id || request.user.role == "admin") {
+const authorizedSelfOrAdmin = async(request, response, next) => {
+	if(
+		request.user.userId === request.params.id || 
+		request.user.role === "admin"
+	) {
 		next();
 	} else {
-		throw new ForBiddenError("You're not allowed to delete other");
+		throw new ForBiddenError(
+			"Access denied"
+		);
 	}
 }
 
-export { validateToken, authorizedAdmin };
+const authorizedAdmin = (request, response, next) => {
+	if (request.user.role === "admin") return next();
+	throw new ForBiddenError("Access denied - Admins only");
+};
+
+export { validateToken, authorizedSelfOrAdmin, authorizedAdmin };

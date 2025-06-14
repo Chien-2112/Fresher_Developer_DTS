@@ -4,16 +4,17 @@ import express from "express";
 import { instanceUserController } from "../../controllers/user.controller.js";
 import { 
 	validateToken, 
-	authorizedAdmin 
+	authorizedSelfOrAdmin,
+	authorizedAdmin,
 } from "../../middlewares/validateToken.js";
 
 const router = express.Router();
 
 router.use(validateToken);
 
-router.get("/", instanceUserController.getAllUsers);
-router.get("/:id", instanceUserController.getUser);
+router.get("/", authorizedAdmin, instanceUserController.getAllUsers);
+router.get("/:id", authorizedSelfOrAdmin, instanceUserController.getUser);
 router.put("/:id", instanceUserController.updateUserById);
-router.delete("/:id", authorizedAdmin, instanceUserController.deleteUserById);
+router.delete("/:id", authorizedSelfOrAdmin, instanceUserController.deleteUserById);
 
 export { router as userRoute };
